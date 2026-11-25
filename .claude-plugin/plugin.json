@@ -1,0 +1,9 @@
+{
+  "name": "ai-skills",
+  "description": "Skills for building production web apps: API design, authentication, security, hardening, testing, UI, naming, structure, dev environment and agent delivery workflow.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Harrison Lewis"
+  },
+  "repository": "https://github.com/harrisonclewis/ai-skills"
+}

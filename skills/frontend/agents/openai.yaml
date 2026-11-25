@@ -1,0 +1,3 @@
+interface:
+  display_name: "Frontend"
+  short_description: "Build frontend pages, lists, forms and UI copy in any framework"
