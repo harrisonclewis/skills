@@ -5,13 +5,13 @@ A collection of agent skills for building production web apps, from API design a
 ## Install
 
 ```bash
-npx skills add harrisonclewis/ai-skills
+npx skills add harrisonclewis/skills
 ```
 
 Or as a Claude Code plugin:
 
 ```bash
-/plugin marketplace add harrisonclewis/ai-skills
+/plugin marketplace add harrisonclewis/skills
 /plugin install ai-skills@ai-skills
 ```
 

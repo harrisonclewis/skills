@@ -4,7 +4,7 @@ This file is the single source of guidance for coding agents working in this rep
 
 ## What this repository is
 
-A collection of agent skills for building production web apps, distributed two ways: via `npx skills add harrisonclewis/ai-skills` and as the Claude Code plugin `ai-skills` served by the marketplace in this same repository. It is documentation, with no build, lint or test tooling.
+A collection of agent skills for building production web apps, distributed two ways: via `npx skills add harrisonclewis/skills` and as the Claude Code plugin `ai-skills` served by the marketplace in this same repository. It is documentation, with no build, lint or test tooling.
 
 `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` define the plugin and its marketplace. Plugin users invoke skills as `/ai-skills:api`, skills-CLI users as `/api`. Skills are discovered from `skills/` automatically, so adding a skill needs no manifest change.
 
