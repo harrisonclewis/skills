@@ -52,3 +52,21 @@ Vue, Svelte and Solid don't double-invoke on purpose, but HMR, `<KeepAlive>` (`o
 ## Where strict mode applies
 
 Typically: the dev server only. Production builds drop it; unit tests and end-to-end runs usually don't wrap in it unless configured. So something that happens only on the dev server may be strict mode, and the production build is where to judge it. Whether tests should enable it is `testing`'s call.
+
+## Before you finish
+
+| Pattern | Fix |
+| --- | --- |
+| An effect adding a listener, observer or subscription with no teardown | Return the matching cleanup |
+| `setTimeout`, `setInterval`, `requestAnimationFrame` or a delayed-loading/"Copied" timer not cleared | Clear it in cleanup |
+| A module-level `initialised`/`hasRun` guard | Remove it; make the effect idempotent |
+| A fetch in a mount effect | The resource hook (`data-loading.md`) |
+| An analytics "page viewed" fired on mount without dedupe | Dedupe by key, or fire once per route change |
+| `Date.now()` or `Math.random()` producing an ID during render | State, or an ID from the API |
+| A promise that sets state, calls `onCopied` or navigates after unmount | A `cancelled`/`mounted` flag or `AbortController` |
+| Props or shared objects mutated during render | Compute from props and state |
+| An in-flight guard reset in cleanup | Keep it; only a really cancelled action resets |
+| A portal or library instance created on mount with no teardown | Create once and dispose in cleanup |
+| Session, tenant or fetched data in a module-level variable | Context and the cache library |
+| A timing or animation fix judged on the dev server | Re-check on the production build |
+| A ref counting calls across renders to detect "twice" | Remove the counter; rendering is pure |

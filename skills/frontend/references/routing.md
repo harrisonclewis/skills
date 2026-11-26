@@ -67,6 +67,7 @@ All signed-in pages sit inside one **layout route** that stays mounted between p
 Why: remounting chrome on every navigation loses sidebar scroll and open state, replays animations and refetches the tenant list.
 
 - The layout fades each new page in, keyed by **pathname** (a new search or page number is not a new page and must not re-animate).
+- **A route change updates `document.title` and moves focus to the new page's `<h1>`** (`tabindex="-1"`), so a screen-reader user hears where they landed; scroll to the top on a new navigation and restore it on Back/Forward. Title order is most specific first: "Billing · Settings · Acme". Detail in [accessibility.md#route-changes](accessibility.md#route-changes).
 - A tenant already in the switcher's list renders at once while its record refreshes.
 - **NEVER copy the session or tenant into module-level variables.** They change on sign-out and switch; module state survives both and leaks across accounts.
 - The sidebar marks an item current on its own path and its sub-paths (`/projects/prj_…` highlights Projects) with `aria-current="page"`. Pages reached through a menu (settings) mark the menu's button as selected; don't add sidebar items for settings pages.
@@ -129,3 +130,23 @@ Why: URLs land in history, server logs, referrer headers, analytics and screensh
 ## Public pages
 
 Public pages (home, docs, policies) may be prerendered at build time. They are built without a session, so they hold no user data; a "Log in" link switches to "Dashboard" once the browser finds a session. Which pages to prerender, their cache headers and the SPA trade-offs (a missing record renders "not found" with HTTP 200): `ops/references/web-delivery.md` §1.
+
+## Before you finish
+
+| Pattern | Fix |
+| --- | --- |
+| `fetch(` or a `"/api/` string outside the API client | A typed path in the API client |
+| A URL built by concatenation (`/app/${id}`) in a component | The route's URL builder |
+| A `pages/` file with no `route(...)` entry, or file-system routing | One explicit registry entry |
+| A loader that loads a page's record | Render the page and its skeleton; fetch through the resource hook |
+| `useEffect`/`onMounted` fetching a page's data | The resource hook (`data-loading.md`) |
+| `window.location` or `<a href>` without the router for an in-app page | The router's link or `navigate()` |
+| A click handler that goes somewhere on a `div`, `span` or `button` | A link with `href` |
+| A URL parameter used without `parsePublicId` | Validate it, then render "not found" without a request |
+| `?email=`, `?token=` or another transient value in the query | Router navigation state |
+| `next` used without `returnPath()` | Same-origin path plus an allowlisted route pattern |
+| A module-level `session`, `tenant` or user object | Context |
+| `document.title` unchanged after navigation, or focus left on the old page | Set the title and focus the new `<h1>` |
+| A page transition keyed by search params | Key by pathname |
+| An error report carrying the path or query | The route pattern |
+| A new signed-in page missing from the `?next=` allowlist and pattern catalogue | Add both |

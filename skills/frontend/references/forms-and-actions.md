@@ -52,6 +52,7 @@ Run the action through the action hook (`mutations.md`): the button gets `loadin
 - A button disabled by form state passes a **`disabledReason`** in one of exactly two wordings:
   - **"No changes made"**: nothing differs from what's saved.
   - **"Fill in required fields"**: something needed is empty or invalid.
+- **Only a settings Save is disabled like this.** Every other form — create, sign-in, wizard step — keeps its submit enabled and validates on submit: `aria-invalid` on each invalid field, the message under it, and focus on the first invalid field. Type-to-confirm in a destructive confirmation may stay disabled until the name matches exactly.
 - The reason is a tooltip on a wrapper (a disabled button gets no pointer events) and the button's accessible description (`aria-describedby`).
 - Not for `loading`, which explains itself.
 
@@ -114,6 +115,8 @@ The collapsed section at the bottom of settings (table above):
 
 **Every "are you sure?" is one confirmation component.** Never build one by hand from a plain dialog.
 
+**Prefer Undo to a confirmation when the action is frequent and the API can reverse it** (archive, move, delete into a trash): act at once and put **Undo** on the success toast (`mutations.md#every-success-is-a-toast`). Confirm first when the action is irreversible, affects other people, or acts on many items at once. Permanent delete is always a confirmation dialog.
+
 ```
 <ConfirmationDialog
   open onClose
@@ -139,7 +142,7 @@ The collapsed section at the bottom of settings (table above):
 
 ### Delete is never a page
 
-Delete is a confirmation dialog opened from a ⋯ menu item or a danger zone row, calling the client's `destroy`. There is no `/projects/{id}/delete` page (see `naming`). After deleting from the record's own page, navigate to its list.
+Delete is a confirmation dialog opened from a ⋯ menu item or a danger zone row, calling the client's `destroy`. There is no `/projects/{id}/delete` page (see `naming`). After deleting from the record's own page, navigate to its list. Deleting into a trash is not this dialog: it acts at once with Undo on the toast.
 
 ## Examples
 
@@ -169,3 +172,26 @@ Delete is a confirmation dialog opened from a ⋯ menu item or a danger zone row
 ## Check your change
 
 Look at it at phone width and desktop width. Every action is at the bottom right of what it acts on (or full width on a sign-in page), the primary rightmost (on top when stacked).
+
+## Before you finish
+
+| Pattern | Fix |
+| --- | --- |
+| A settings Save that is always enabled | Disabled until the normalised value differs and is valid |
+| A disabled Save with no `disabledReason` | "No changes made" or "Fill in required fields" |
+| A create, sign-in or wizard submit disabled until valid | Keep it enabled and validate on submit |
+| Validation shown only in a toast or at the top of the form | Under each field, `aria-invalid`, focus the first invalid one |
+| `onClick` on the submit button | `onSubmit` on the form |
+| A Cancel, Reveal or Copy button without `type="button"` | Add it |
+| A confirmation built from `Dialog` by hand | The one confirmation component |
+| A confirmation dialog for archiving, moving or trashing | Act at once, Undo on the success toast |
+| An irreversible, shared or bulk action with no confirmation | Confirm first |
+| A `/…/delete` route or a delete page | A confirmation dialog |
+| Type-to-confirm whose confirm is enabled on any input | Disabled until the name matches exactly |
+| `disabled` on a value the user may see but not change | Read-only with a lock and the reason |
+| Signed-in actions left-aligned or full width | Bottom right of what they act on |
+| Two solid buttons in one group | One primary; the other outline or plain |
+| Red on a non-destructive action | Red only in a danger zone, a confirmation, or a danger menu item |
+| A dialog keyed by its target | Key by an open counter |
+| A dialog that can close while `busy` | `onClose = () => !action.busy && close()` |
+| A dialog that starts open state from the last opening | Reset on every opening |

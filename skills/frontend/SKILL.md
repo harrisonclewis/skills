@@ -1,6 +1,6 @@
 ---
 name: frontend
-description: How the web frontend is built in any framework (React, Vue, Svelte, Solid…) - routing and layouts, loading data through a cached resource hook, mutations through one action hook, URL-driven paginated lists, form and button placement, confirmations, the design system, UX copy, secrets in the UI, copy-to-clipboard, accessibility (including charts), mobile checks and dev double-render discipline. Use when adding or changing a page, route, list, table, form, dialog, button, toast, component, chart or any UI text, or when reviewing frontend code.
+description: How the web frontend is built in any framework (React, Vue, Svelte, Solid…) - routing and layouts, loading data through a cached resource hook, mutations through one action hook, URL-driven paginated lists, form and button placement, confirmations, the design system (typography, colour, layout, surfaces, motion), UX copy, secrets in the UI, copy-to-clipboard, accessibility (including charts), mobile checks, seeing every state before calling UI done, and dev double-render discipline. Use when adding or changing a page, route, list, table, form, dialog, button, toast, component, chart, animation, style or any UI text, when building from a design, or when reviewing frontend code.
 ---
 
 # UI patterns
@@ -14,6 +14,7 @@ The rules for a single-page app talking to a JSON API. Framework names (React, V
 - Building a list, table, search, sort, filter or pagination.
 - Placing buttons, writing a form, a dialog or a confirmation.
 - Adding or styling a component, writing UI text, a toast or an error message.
+- Setting type, colours, spacing, radii, shadows, icons or animation; building from a design.
 - Showing a secret, a sensitive value or a Copy button.
 - Reviewing frontend code before merge.
 
@@ -27,9 +28,14 @@ The rules for a single-page app talking to a JSON API. Framework names (React, V
 | [references/lists-and-pagination.md](references/lists-and-pagination.md) | Tables, search, sort, filters, page selectors, cursor and infinite lists |
 | [references/forms-and-actions.md](references/forms-and-actions.md) | Placing or styling any button, building a form, dialog or confirmation |
 | [references/design-system.md](references/design-system.md) | Writing or styling components, overlays, motion, toasts, preferences, mobile/desktop checks |
+| [references/typography.md](references/typography.md) | Type scale, font loading, line-height, wrapping, truncation, numbers, inputs on iOS |
+| [references/color.md](references/color.md) | Colour ramps, semantic tokens, dark mode, contrast measurement |
+| [references/layout.md](references/layout.md) | Grouping, spacing, alignment, responsive structure, overflow, RTL, room for translation |
+| [references/surfaces.md](references/surfaces.md) | Radii, shadows and borders, image outlines, hover on touch, overlay scroll, icons |
 | [references/copy.md](references/copy.md) | Writing any visible text: labels, titles, toasts, errors, empty states |
 | [references/sensitive-values-and-copying.md](references/sensitive-values-and-copying.md) | Showing secrets, one-time keys, personal data, or a Copy button |
 | [references/accessibility.md](references/accessibility.md) | Every UI change; charts and data visualisations in particular |
+| [references/verifying-states.md](references/verifying-states.md) | Before calling UI done: state pages, stress scenarios, building from a design, reviewing a diff |
 | [references/dev-double-render.md](references/dev-double-render.md) | Writing effects, subscriptions, timers; "it only happens in dev" bugs |
 
 ## 1. Routing and pages
@@ -43,6 +49,7 @@ The rules for a single-page app talking to a JSON API. Framework names (React, V
 - **MUST validate an ID from the URL by the API's own rule** (`parsePublicId("prj", value)`: prefix + exact length/alphabet) before fetching. Invalid → render "not found", send no request. A 404 from the API also renders "not found" inside the layout.
 - **Transient data travels in navigation state, not the URL:** a typed email handed from login to "forgot password", a "Project deleted." message for the next page, a cursor stack. URLs end up in history, logs, referrers and screenshots.
 - **Navigation is a link** (`<a href>` rendered by the router), never a button with `onClick={navigate}`: middle-click, open-in-new-tab and the status-bar preview must work.
+- **A route change sets `document.title` and moves focus to the new page's `<h1>`**: client-side navigation resets neither, so screen-reader users hear nothing.
 - **NEVER keep the session or current tenant in module-level variables.** Read them from context; they change on sign-out and tenant switch.
 
 ## 2. Data loading
@@ -78,7 +85,7 @@ The rules for a single-page app talking to a JSON API. Framework names (React, V
 
 - **`run` ignores calls while one is in flight** (double click = one request) and **awaits everything the action awaits, including the navigation that ends it**, so the button keeps spinning until the next page has loaded.
 - **Where errors go:** form → error notice below its action row; error naming a field (`error.field`) → under that field; button with no fields → error toast; failed load → notice with Retry beside kept data; inside a dialog → stays in the dialog with the typed values; 401 → login with `?next=`.
-- **Every success is a toast** ("Project created."), not a `done` state or inline banner. If the action navigates out of the layout that hosts the toaster, pass the message in navigation state and show it on arrival.
+- **Every success is a toast** ("Project created."), not a `done` state or inline banner. A frequent, reversible action (archive, move, delete into a trash) runs at once and its toast offers **Undo**; irreversible, shared or bulk actions confirm first. If the action navigates out of the layout that hosts the toaster, pass the message in navigation state and show it on arrival.
 - **A 5xx shows its request ID** ("Reference: req_…", selectable) under the error, so a user can quote it and support can find the log lines.
 
 ## 4. Lists
@@ -96,7 +103,7 @@ The rules for a single-page app talking to a JSON API. Framework names (React, V
 - **At most one solid button per group.** Secondary that cancels/goes back: plain; alternative that does something: outline.
 - **Red only for destructive actions**, and only in a danger zone, a confirmation's confirm button, or a danger item in a ⋯ menu. Sign out is not destructive.
 - **Labels are verb + object:** "Create project", "Delete workspace". NEVER "OK", "Submit", bare "Delete".
-- **A settings Save is disabled until something differs and would be accepted**, and says why in one of two wordings: "No changes made" or "Fill in required fields".
+- **A settings Save is disabled until something differs and would be accepted**, and says why in one of two wordings: "No changes made" or "Fill in required fields". **Every other form keeps submit enabled and validates on submit**: errors under the fields, `aria-invalid`, focus on the first invalid field.
 - **Submit is `type="submit"` inside a `<form>`** so Enter works; every other button in a form is `type="button"`.
 - **ONE confirmation component for every "are you sure?"**: names the target in its title, states the consequence, confirm label says what it does, runs through the action hook, keeps the dialog open with the error on failure. Heavy destruction adds type-to-confirm (and the password). **Delete is a confirmation dialog, NEVER a page.**
 - **Reset dialog state on every opening** (key the dialog by an open counter), never key it by its target.
@@ -112,13 +119,18 @@ The rules for a single-page app talking to a JSON API. Framework names (React, V
 - **One component foundation for behaviour** (focus, keyboard, overlays, ARIA); never a second component kit beside it. Pages use the project's own components (wrappers, or copied-in source the project owns), never a third-party UI package directly.
 - **NEVER colour alone:** every status/level colour comes with a word or icon.
 - **A fixed z-index scale:** dialogs 50, popovers/menus 60, tooltips 70, toasts 80.
-- **Motion is subtle and CSS-first** (fades ≤ 200 ms, small lifts/slides), off under `prefers-reduced-motion`.
+- **Type:** a small role-named scale pairing size, unitless line-height and weight; `rem` sizes; no weights below 400 under 18 px; `tabular-nums` on changing numbers; inputs ≥ 16 px on iOS. Details in [references/typography.md](references/typography.md).
+- **Colour:** one neutral ramp, one accent, only the status ramps in use; components use semantic tokens only, never primitives; dark mode is its own tuned ramp; contrast is measured on the rendered pair. Details in [references/color.md](references/color.md).
+- **Layout:** group with space before lines (between-group gap ≥ 2× within); DOM order is visual order; `minmax(0, 1fr)`, `100dvh`, container queries, logical properties; text boxes grow, never fixed heights. Details in [references/layout.md](references/layout.md).
+- **Surfaces:** concentric radii (outer = inner + padding); shadows for elevation, borders for structure; hover styles only under `@media (hover: hover)`; `overscroll-behavior: contain` on scrolling overlays; icons in `currentColor`. Details in [references/surfaces.md](references/surfaces.md).
+- **Motion is rare, short and CSS-first:** high-frequency interactions don't animate; duration grows with size (≈150 ms tooltips, ≈250 ms menus, ≈300–400 ms dialogs), exits are shorter, popups scale from their trigger, never `transition: all`; under `prefers-reduced-motion` movement becomes a plain fade. Details in [references/design-system.md#motion](references/design-system.md#motion).
 - **Persisted UI preferences** (a hidden sidebar) are read from storage during render so the first paint is right; never flipped by an effect after mount (it flashes).
 
 ## 7. Copy
 
 - Sentence case; verb + object on actions; toasts are a past-tense fact with a full stop ("Acme deleted."); a confirmation title is a question naming the target ("Delete Acme?"); descriptions only when they add something the title doesn't.
 - **NEVER render text taken from the URL** (`?notice=` selects a fixed message by key; unknown keys show nothing): it is a phishing/content-injection vector.
+- Links name their destination (never "Click here" or a bare "Learn more"); toggles describe the ON state; strings are built whole with plural rules, never concatenated.
 - **Show the API's error message**; don't invent one. Never wording that reveals whether an account or address exists.
 - Typography: ’ “ ” – … . Details in [references/copy.md](references/copy.md).
 
@@ -137,13 +149,19 @@ The rules for a single-page app talking to a JSON API. Framework names (React, V
 
 - Keyboard reachable, visible focus, accessible names, errors announced (`role="alert"`), statuses announced (`role="status"`), reduced motion, focus returned to the opener when an overlay closes.
 - Hidden UI is out of the tab order and the accessibility tree, not just transparent.
+- Native elements before ARIA; a skip link before repeated navigation; live regions rendered empty before their text changes; never block paste; never `maximum-scale=1`; nothing the user needs disappears on a timer (error and Undo toasts stay until dismissed).
 - **Charts:** SVG `aria-hidden`; the figure carries a one-sentence summary and a visually hidden table of every value; a visible "Show as table" toggle; series colours in a fixed order, never status colours; tooltips and click-to-zoom are shortcuts, never the only way.
 
 ## 11. Mobile and desktop
 
 - **Check every UI change at phone width (~375 px) and desktop width** (full list in [references/design-system.md](references/design-system.md#mobile-and-desktop-checks)) before calling it done: actions bottom right (stacked full width on phones, primary on top), header actions wrap below the title, tables scroll horizontally inside their container, page numbers hide on small screens, touch targets ≥ 44 px, nothing widens the page.
 
-## 12. Dev double-render discipline
+## 12. See every state before calling it done
+
+- **Look at the states, don't assume them.** For a non-trivial component, render each state its code can reach (loading, empty, error, one, many, stale, each role) on a throwaway dev-only page fed with product-shaped fixtures, plus the stress cases its inputs allow (long and unbreakable text, emoji, RTL, 320 px, 200 % zoom, both themes). Building from a design maps every value to an existing token and reports what was rounded. Reviewing a diff reads the removed lines for lost labels, focus styles and motion guards. Details in [references/verifying-states.md](references/verifying-states.md).
+- **Never claim a visual check you didn't do.** No browser at hand: say so and hand over the URL.
+
+## 13. Dev double-render discipline
 
 - **Rendering is pure; every effect cleans up what it set up** (listeners, timers, observers, subscriptions) and **never assumes it runs once**. Dev modes mount → unmount → mount (React StrictMode), HMR and keep-alive remount components. Keep strict mode on; judge timing and animation on the production build.
 
@@ -158,12 +176,14 @@ The rules for a single-page app talking to a JSON API. Framework names (React, V
 - [ ] Mutations go through the action hook; double submit impossible; caches revalidated (delete drops `show`; sign-out clears all).
 - [ ] Success toast; error in the right place; 5xx shows its reference.
 - [ ] List state in the URL, canonical, page 1 on change, debounced search with `replace`, `aria-sort`.
-- [ ] Primary rightmost, one solid per group, red only for destruction, verb + object labels, disabled Save says why.
+- [ ] Primary rightmost, one solid per group, red only for destruction, verb + object labels, disabled Save says why; other forms validate on submit.
 - [ ] Confirmation via the one component; dialog state reset per opening; delete is not a page.
 - [ ] Styling follows the project's one approach, tokens only (no raw values), no interpolated class names, no colour-only meaning, z-index from the scale.
+- [ ] Type, colour, layout and surface rules hold; every reference touched has its **Before you finish** detections checked against the diff.
+- [ ] Motion only where it earns it, sized durations, named properties, a reduced-motion fade.
 - [ ] Copy follows [references/copy.md](references/copy.md); nothing from the URL rendered.
 - [ ] Secrets out of the DOM until revealed; one-time secrets in component state only.
 - [ ] Keyboard, focus, names, announcements, reduced motion; charts have summary + table.
-- [ ] Checked at phone and desktop width.
+- [ ] Checked at phone and desktop width; every reachable state and the relevant stress cases seen in a browser (or stated as not verified).
 - [ ] Effects clean up; works under dev double-mount.
 - [ ] Tests per `testing`.

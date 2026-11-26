@@ -143,3 +143,28 @@ When a list has more filters than fit beside its heading:
 - Applied filters show as **removable badges** under the heading. Removing one applies at once; clicking its text reopens the dialog. After removing, **focus moves to the next badge** (or the Filters button), never lost to `<body>`.
 - **Clear all** (a text button) appears once two or more badges are shown.
 - Every filter is in the URL; each change is a navigation, so Back undoes it.
+
+## Before you finish
+
+| Pattern | Fix |
+| --- | --- |
+| `useState` for page, search, filter or sort | Read from and write to the URL |
+| `navigate(` from a search with no `replace` | `replace`, after the 300 ms debounce |
+| `page=1` left in the URL, or defaults left in as params | Omit defaults and page 1 |
+| A search, filter or sort change that keeps `page` | Reset to page 1 |
+| Filters or sort changed with `replace` | Push a history entry so Back undoes it |
+| A page link that scrolls to the top | `preventScrollReset` |
+| `onClick` page numbers, or `<button>` for Previous/Next | Real links |
+| `aria-sort="none"` on every header | `ascending`/`descending` on the sorted one only |
+| A sortable header as a button, or a chevron with no `aria-sort` | A link to the next sort's URL, with `page` reset |
+| An error notice inside `<tbody>` or as a table row | Above the table, kept rows below |
+| One empty state for "no records" and "no matches" | Split by whether filters are applied |
+| A page selector shown with a single page | Hide the footer controls until there is more than one page |
+| The page header repeating the total | Keep the count in the footer only |
+| Loose action buttons in a row, or every cell in the tab order | One ⋯ menu, one tab stop per row |
+| An `IntersectionObserver` on the viewport inside a popup | Root it in the scrolling list |
+| A cursor list with `page=` or page numbers | `before=<cursor>` with Older/Newer |
+| An infinite list not de-duplicated by ID | De-duplicate pages by ID |
+| `loadMore()` with no guard | Ignore while loading, at the end, or after an error |
+| A "refresh all pages" call missing after create/rename | Revalidate page 1 and the loaded pages |
+| A selected chip drawn from the visible results | Keep selections as IDs and labels, apart from the results |

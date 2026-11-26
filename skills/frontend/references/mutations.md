@@ -51,12 +51,13 @@ Why two flags: a 50 ms request that greys out the form and flashes a spinner loo
 | 428 challenge (CAPTCHA) | handled centrally by the API client: it opens one challenge dialog, resends the request once with the token; `busy` stays true meanwhile; Cancel becomes an ordinary error ("Check cancelled.") with the form kept. Pages never handle it. |
 | Timeout / network | "Couldn’t reach the server. Check your connection and try again." in the same place as other errors |
 
-Show the API's message: the API writes human messages for 4xx. A 5xx has a generic message plus its request ID (below).
+Show the API's message: the API writes human messages for 4xx. A 5xx has a generic message plus its request ID (below). An **error toast stays until dismissed** (`design-system.md#toasts`): on a form-less page it is the only record of the failure.
 
 ## Every success is a toast
 
 - Every finished action says so: created, renamed, deleted, invited, role changed, removed, revoked, password changed, sessions signed out. `toast.success("Workspace renamed.")`.
 - Not a `done` state or an inline green banner: those need clearing, move the layout, and are missed when the user's eyes are on the button.
+- **Undo on the toast** for a frequent action the API can reverse (archive, move, delete into a trash): run it at once with no confirmation, and give the success toast an **Undo** action ("Project archived." · Undo). Undo runs through the same action hook and revalidates like any mutation; a toast carrying an action stays until dismissed (`design-system.md#toasts`).
 - **Exceptions:** the action's result is itself the confirmation (signing out lands on login; a dialog that switches to a "success" step, such as a one-time secret).
 - **Leaving the toaster's layout:** a toast fired just before navigating outside the layout that mounts the toaster (to onboarding, to login) is unmounted with it. Pass the message in navigation state and let the next page show it ("Your account has been deleted." on login). Arriving into the layout works the same way: the layout reads `{ createdWorkspace: "Acme" }` and toasts "Acme created.".
 - Pages without a toaster (sign-in pages) show an inline success notice instead.
@@ -97,3 +98,23 @@ onSubmit(event):
 ```
 
 **Common mistakes:** `onClick` on the submit button instead of `onSubmit` on the form (Enter stops working); `disabled={saving}` on the submit button instead of `loading` (no spinner, no accessible busy state); setting `saving=false` before the navigation finishes.
+
+## Before you finish
+
+| Pattern | Fix |
+| --- | --- |
+| `try {`/`catch`/`finally` around an API call in a component | The action hook |
+| A `saving`/`loading` boolean set around a request | `save.busy` and `save.loading` |
+| `disabled={saving}` on a submit with no spinner or `aria-busy` | `loading={action.loading}` |
+| `saving = false` before the navigation finishes | Await everything the action awaits |
+| A success banner, a `done` state or an inline green notice | A success toast |
+| A success toast fired just before leaving the toaster's layout | Navigation state, shown on arrival |
+| An error toast that hides on a timer | Keep it until dismissed |
+| A retry loop or an auto-retry around a mutation | Retry on the user's explicit click only |
+| An Undo that calls `api` directly | Run it through the action hook and revalidate |
+| A 5xx error rendered without its request ID | "Reference: req_…", selectable |
+| `error.requestId` read from a header or a URL value | The response body's shape |
+| A repeated identical error announced only once | Re-key the alert per failure |
+| A submit that runs on a second click while one is in flight | The hook's re-entry guard |
+| CSRF read or sent from a component | The API client reads it from the session |
+| The whole record sent as a mutation body | Only the editable fields |

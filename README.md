@@ -25,7 +25,7 @@ Or as a Claude Code plugin:
 
 ## Skills for building the frontend
 
-- [**frontend**](skills/frontend/SKILL.md): Builds the web frontend in any framework, covering **routing**, **data loading**, **mutations**, **paginated lists**, **forms**, the **design system**, **UX copy** and **accessibility**.
+- [**frontend**](skills/frontend/SKILL.md): Builds the web frontend in any framework, covering **routing**, **data loading**, **mutations**, **paginated lists**, **forms**, the **design system** with **typography**, **colour**, **layout**, **surfaces** and **motion**, **UX copy**, **accessibility** and **seeing every state** before it ships.
 
 ## Skills for keeping a codebase healthy
 
@@ -37,3 +37,7 @@ Or as a Claude Code plugin:
 ## Skills for shipping with agents
 
 - [**delivery**](skills/delivery/SKILL.md): Takes a feature from **raw notes** to a **merged commit** through plans, a build loop with **blind security review**, **overnight runs**, **parallel worktrees** and the **agent roles**.
+
+## License
+
+[MIT](LICENSE)

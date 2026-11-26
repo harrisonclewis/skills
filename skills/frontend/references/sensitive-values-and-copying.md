@@ -66,3 +66,24 @@ copy = useCopy(value, { onCopied })            // value read from state, works w
 - **Clipboard unavailable** (insecure origin, permission refused, old browser): `CopyFailure` shows an instruction under the field or button as an alert and **keeps it until the next try**; an instruction mustn't vanish before it's read. Keep the value selectable (read-only, never disabled) so the instruction can be followed.
 - **`onCopied`** runs after each copy that worked (e.g. recovery codes now count as saved, enabling Continue), **never after the component unmounted**, however late the clipboard answers (guard with a mounted ref and clean up the timer).
 - Recovery codes offer Copy **and** Download; either counts as saved, and the setup's final button waits for one.
+
+## Before you finish
+
+| Pattern | Fix |
+| --- | --- |
+| `navigator.clipboard.writeText` outside the copy hook | `useCopy` plus `CopyButton` |
+| A "Copied!" string rendered on the page | The 3 s tooltip and icon swap, announced once by `role="status"` |
+| The real secret in the DOM under `filter: blur` or a blurred text shadow | A decoy placeholder; the value only after reveal |
+| `type="password"` holding an API key, setup key or recovery code | Bullets in a masked field, value read from state |
+| A hidden secret's text present in the HTML | Keep it out until reveal |
+| A one-time secret in the cache, a store, `localStorage`, the URL or navigation state | Dialog component state only |
+| A secret prefetched with its page | Fetch it when the reveal step opens |
+| A `role="status"` region that is not emptied before the next copy | Empty it before each copy |
+| A clipboard-failure instruction that hides on a timer | Keep it until the next try |
+| A copy timer or `onCopied` that can fire after unmount | Cleanup and a mounted guard |
+| A sensitive input blurred with `text-shadow` instead of the overlay | A `data-blurred` overlay with `backdrop-filter` |
+| A password or MFA field still filled after submit | Clear it on submit and on close |
+| An email, token or key in a query string, `localStorage` or a client error report | Body, navigation state or the route pattern |
+| Step-up proof sent as a separate "verify" request | Send it with the real request |
+| Closing the creation dialog with no confirmation | "Close without copying?" first |
+| A request issuing a secret that retries automatically | Never retry it |

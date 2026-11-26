@@ -104,3 +104,24 @@ Give each resource's path helper a `matches(key)` so "every key of this resource
 ## Infinite pages
 
 Lists in menus and pickers load page by page through an infinite variant of the same hook (keys per page, same `[path, userId]` shape). See `lists-and-pagination.md#infinite-lists`.
+
+## Before you finish
+
+| Pattern | Fix |
+| --- | --- |
+| `useEffect(() => { fetch` or a fetch inside `onMount`/`onMounted` | Read through the resource hook |
+| `useState(null)` for data beside a hand-rolled `loading` boolean | The hook's `data`/`loading`/`error`/`missing` |
+| A **Refresh** button, or `onClick={refresh}` outside a failed load's Retry | Remove it; refetch on focus, after mutations and while pending |
+| `refreshInterval: 3000` with no stop condition | Return `0` once nothing is pending |
+| A retry that covers 4xx, or one with no attempt limit | Network, timeout and 5xx only, twice, with backoff |
+| `retry()` on a 429 | Show the API's message; retry on the user's click |
+| A blank screen, spinner or `null` while the next key loads | Keep the previous data dimmed, `aria-busy="true"` |
+| A spinner for a background revalidation | Show nothing for `refreshing` |
+| A raw `/api/…` path or query string in a component | The typed path helper |
+| A cache key without the user ID | `[path, userId]` |
+| `refresh()` of "the list" only after a mutation | Revalidate every key `matches(key)` recognises |
+| A refetch of a deleted record's `show` key | Drop the key, then revalidate the lists |
+| `clear()` before navigating on sign-out or account deletion | Navigate away first, then clear |
+| A `null` path used where the user lacks permission turned into a fetch | Keep the path `null` and render the notice |
+| A read with a server-side effect left on focus revalidation | Turn focus/reconnect revalidation off for it |
+| Module-level storage of user data outside the cache | The cache library only |
