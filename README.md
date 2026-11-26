@@ -1,4 +1,4 @@
-# ai-skills
+# skills
 
 A collection of agent skills for building production web apps, from API design and authentication to testing, hardening and shipping with AI agents.
 
@@ -12,7 +12,7 @@ Or as a Claude Code plugin:
 
 ```bash
 /plugin marketplace add harrisonclewis/skills
-/plugin install ai-skills@ai-skills
+/plugin install skills@skills
 ```
 
 ## Skills for building the backend

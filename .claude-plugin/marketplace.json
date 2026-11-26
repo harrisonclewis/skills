@@ -1,12 +1,12 @@
 {
-  "name": "ai-skills",
+  "name": "skills",
   "description": "Agent skills for building production web apps, from API design and authentication to testing and delivery.",
   "owner": {
     "name": "Harrison Lewis"
   },
   "plugins": [
     {
-      "name": "ai-skills",
+      "name": "skills",
       "source": "./",
       "description": "Skills for building production web apps: API design, authentication, security, hardening, testing, UI, naming, structure, dev environment and agent delivery workflow."
     }

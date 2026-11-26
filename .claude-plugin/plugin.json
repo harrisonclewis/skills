@@ -1,5 +1,5 @@
 {
-  "name": "ai-skills",
+  "name": "skills",
   "description": "Skills for building production web apps: API design, authentication, security, hardening, testing, UI, naming, structure, dev environment and agent delivery workflow.",
   "version": "1.1.0",
   "license": "MIT",
